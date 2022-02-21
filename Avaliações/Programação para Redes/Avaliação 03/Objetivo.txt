@@ -1,0 +1,79 @@
+A atividade consiste em desenvolver um cliente e um
+servidor de chat simples, usando TCP.
+
+Programa cliente de chat
+
+Faça um programa de cliente de chat que atenda às seguintes especificações:
+
+    1. Conecte ao servidor TCP no endereço (IP, porta) em que o servidor estiver
+    escutando (vide detalhes do servidor na próxima seção);
+
+    2. Envie um comando de login (veja formato dos pacotes abaixo), após perguntar
+    esses dados ao usuário;
+
+    3. Se o login for bem-sucedido, leia repetidademnte um texto a ser digitado pelo
+    usuário:
+    
+        3.1 Se o texto iniciar com:
+            !l - faça novo login (usuário informa login e senha)
+            !x - faça logoff do servidor
+            !q - faça logoff e saia do programa
+
+        3.2 Qualquer outro texto, exceto textos vazios, deve ser enviado ao servidor
+        como mensagem de texto.
+
+    4 Ao mesmo tempo em que espera o usuário digitar, leia mensagens do servidor e
+    exiba na tela dos clientes.
+
+
+As mensagens têm formato codificado em UTF-8, no seguinte padrão:
+
+    CODIGO TAMANHO TEXTO
+    Código - 3 posições númericas
+    001 - Login
+    002 - Logoff
+    003 – Texto
+
+    Tamanho - 3 posições númericas (indica o tamanho do texto que segue)
+    
+    Texto - O texto da mensagem. Para login, a mensagem
+    deve seguir o padrão user/senha. Para logoff, essa
+    parte inexiste. Para mensagens do usuário, o texto por ele digitado.
+
+Formato das mensagens recebidas do servidor
+
+    Código - 3 posições númericas
+    003 - Texto
+    004 - Erro
+
+    Tamanho - 3 posições númericas (indicando o tamanho do texto seguinte)
+
+    Texto - O texto da mensagem. Para erro, indica a mensagem de erro.
+    Programa servidor de chat
+
+    O servidor deve escutar na porta TCP 6432 de todas as interfaces presentes na máquina
+    em que está executando.
+
+    A operação do servidor deve considerar que:
+        1. o servidor deve continuamente aceitar conexões de novos clientes;
+        
+        2. as mensagens, conforme já explicitado no projeto do cliente podem ser de login,
+        texto e logoff. Os formatos também já foram elucidados.
+        
+        3. uma lista de clientes válidos, com suas respectivas senhas, deve ser mantida no
+        servidor (você define os nomes de usuários e senhas - pode ser hardcoded);
+        
+        4. a mensagem de login deve ser a primeira recebida de cada cliente; Após a
+        mensagem de logoff, o servidor deve fechar a conexão com o respectivo cliente;
+        
+        5. uma mensagem recebida de um cliente deve ser repassada a todos os outros
+        usuários;
+        
+        6. uma mensagem só pode ser repassada aos demais clientes se o cliente que
+        enviou estiver logado. Caso contrário, uma mensagem de erro deve ser
+        devolvida apenas ao cliente que tentou enviar.
+        
+        7. uma mensagem de logoff tira o cliente da lista dos logados no servidor.
+        
+        8. mensagens de login de clientes já logados, ou de logoff daqueles não logados,
+        geram mensagem de erro destinada ao remetente.

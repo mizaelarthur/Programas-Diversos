@@ -1,58 +1,56 @@
 import socket
 import threading
-
-
+#
+# Parametros do Servidor
 HOST = socket.gethostbyname('localhost')
 PORTA = 6432
-
-
-server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-server.bind((HOST,PORTA))
-server.listen()
-
-
-clients = []
-usernames = ['mizael','marcelo']
-
-
-
-def globalMessage(message):
-    for client in clients:
-        client.send(message)
-
-def handleMessages(client):
+#
+# Parametros para conexão TCP
+servidor = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+servidor.bind((HOST,PORTA))
+servidor.listen()
+#
+# Listas Contendo Logins Permitidos e Lista para Armazenar logins ativos
+usuarios = []
+logins = ['mizael','marcelo']
+#
+#
+# Criação da Função que irá enviar mensagem para todos do servidor
+def MensagemGeral(mensagem):
+    for usuario in usuarios:
+        usuario.send(mensagem)
+# Função que recebe mensagem, decodifica e envia para função MensagemGeral
+def TrocaMensagem(usuario):
     while True:
         try:
-            receiveMessageFromClient = client.recv(2048).decode('utf-8')
-            globalMessage(f'{usernames[clients.index(client)]} :{receiveMessageFromClient}'.encode('utf-8'))
+            MensagemRecebida = usuario.recv(1024).decode('utf-8')
+            MensagemGeral(f'{logins[usuarios.index(usuario)]} :{MensagemRecebida}'.encode('utf-8'))
         except:
-            clientLeaved = clients.index(client)
-            client.close()
-            clients.remove(clients[clientLeaved])
-            clientLeavedUsername = usernames[clientLeaved]
-            print(f'{clientLeavedUsername} has left the chat...')
-            globalMessage(f'{clientLeavedUsername} has left us...'.encode('utf-8'))
-            usernames.remove(clientLeavedUsername)
-
-
-def initialConnection():
+            usuarioSaiu = usuarios.index(usuario)
+            usuario.close()
+            usuarios.remove(usuarios[usuarioSaiu])
+            usuarioSaiuLogin = logins[usuarioSaiu]
+            print(f'{usuarioSaiuLogin} Saiu.')
+            MensagemGeral(f'{usuarioSaiuLogin} Saiu'.encode('utf-8'))
+            logins.remove(usuarioSaiuLogin)
+#
+# Função para iniciar a conexão, verificando Login
+def Conexao():
     while True:
         try:
-            client, address = server.accept()
-            print(f"New Connetion: {str(address)}")
-            clients.append(client)
-            client.send('login'.encode('utf-8'))
-            username = client.recv(2048).decode('utf-8')
-            #usernames.append(username)
-            if username in usernames:
-                globalMessage(f'{username} Se juntou a sala!'.encode('utf-8'))
-                user_thread = threading.Thread(target=handleMessages,args=(client,))
+            usuario, address = servidor.accept()
+            usuarios.append(usuario)
+            usuario.send('login'.encode('utf-8'))
+            login = usuario.recv(1024).decode('utf-8')
+            if login in logins:
+                MensagemGeral(f'{login} Se juntou a sala!'.encode('utf-8'))
+                user_thread = threading.Thread(target=TrocaMensagem,args=(usuario,))
                 user_thread.start()
             else:
                 print('Tentativa de Login falhou!!!')
-                client.send('LoginFalhou'.encode('utf-8'))
+                usuario.send('LoginFalhou'.encode('utf-8'))
         except:
             pass
-
-
-initialConnection()
+#
+# Chamando a função para iniciar o código
+Conexao()
